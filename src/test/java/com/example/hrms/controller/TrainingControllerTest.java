@@ -1,10 +1,9 @@
 package com.example.hrms.controller;
 
-import com.example.hrms.dto.CreateUpdateHolidayRequest;
+import com.example.hrms.dto.CreateEnrollmentRequest;
+import com.example.hrms.dto.CreateTrainingProgramRequest;
 import com.example.hrms.entity.*;
-import com.example.hrms.repository.HolidayRepository;
-import com.example.hrms.repository.RoleRepository;
-import com.example.hrms.repository.UserRepository;
+import com.example.hrms.repository.*;
 import com.example.hrms.util.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,73 +24,52 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-public class HolidayControllerTest {
+public class TrainingControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private RoleRepository roleRepository;
-
     @Autowired
-    private HolidayRepository holidayRepository;
-
+    private DepartmentRepository departmentRepository;
     @Autowired
-    private com.example.hrms.repository.EmployeeRepository employeeRepository;
-
+    private PositionRepository positionRepository;
     @Autowired
-    private com.example.hrms.repository.DepartmentRepository departmentRepository;
-
+    private EmployeeRepository employeeRepository;
     @Autowired
-    private com.example.hrms.repository.PositionRepository positionRepository;
-
+    private TrainingProgramRepository trainingProgramRepository;
     @Autowired
-    private com.example.hrms.repository.SalarySlipRepository salarySlipRepository;
-
+    private EnrollmentRepository enrollmentRepository;
     @Autowired
-    private com.example.hrms.repository.DocumentRepository documentRepository;
-
+    private SalarySlipRepository salarySlipRepository;
     @Autowired
-    private com.example.hrms.repository.AttendanceRepository attendanceRepository;
-
+    private DocumentRepository documentRepository;
     @Autowired
-    private com.example.hrms.repository.LeaveRequestRepository leaveRequestRepository;
-
+    private AttendanceRepository attendanceRepository;
     @Autowired
-    private com.example.hrms.repository.GoalRepository goalRepository;
-
+    private LeaveRequestRepository leaveRequestRepository;
     @Autowired
-    private com.example.hrms.repository.PerformanceReviewRepository performanceReviewRepository;
-
+    private GoalRepository goalRepository;
     @Autowired
-    private com.example.hrms.repository.EnrollmentRepository enrollmentRepository;
-
+    private PerformanceReviewRepository performanceReviewRepository;
     @Autowired
-    private com.example.hrms.repository.TrainingProgramRepository trainingProgramRepository;
-
+    private OnboardingTaskRepository onboardingTaskRepository;
     @Autowired
-    private com.example.hrms.repository.OnboardingTaskRepository onboardingTaskRepository;
-
-    @Autowired
-    private com.example.hrms.repository.OffboardingTaskRepository offboardingTaskRepository;
-
+    private OffboardingTaskRepository offboardingTaskRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
-
     @Autowired
     private ObjectMapper objectMapper;
-
     @Autowired
     private JwtUtil jwtUtil;
-
     @Autowired
     private UserDetailsService userDetailsService;
 
     private String adminToken;
-    private String employeeToken;
+    private Employee testEmployee;
+    private TrainingProgram testTrainingProgram;
 
     @BeforeEach
     void setUp() {
@@ -104,11 +82,10 @@ public class HolidayControllerTest {
         leaveRequestRepository.deleteAll();
         onboardingTaskRepository.deleteAll();
         offboardingTaskRepository.deleteAll();
-        holidayRepository.deleteAll();
+        trainingProgramRepository.deleteAll();
         employeeRepository.deleteAll();
         userRepository.deleteAll();
         positionRepository.deleteAll();
-        trainingProgramRepository.deleteAll();
         departmentRepository.deleteAll();
         roleRepository.deleteAll();
 
@@ -117,32 +94,40 @@ public class HolidayControllerTest {
         userRepository.save(adminUser);
         adminToken = jwtUtil.generateToken(userDetailsService.loadUserByUsername("admin"));
 
-        Role employeeRole = roleRepository.save(Role.builder().name(RoleType.EMPLOYEE).build());
-        User employeeUser = User.builder().username("employee").password(passwordEncoder.encode("password")).role(employeeRole).status(UserStatus.ACTIVE).build();
+        Department department = departmentRepository.save(new Department(null, "IT", null));
+        Position position = positionRepository.save(new Position(null, "Developer", department));
+        User employeeUser = User.builder().username("employee").password(passwordEncoder.encode("password")).role(adminRole).status(UserStatus.ACTIVE).build();
         userRepository.save(employeeUser);
-        employeeToken = jwtUtil.generateToken(userDetailsService.loadUserByUsername("employee"));
+        testEmployee = employeeRepository.save(Employee.builder().user(employeeUser).name("Test Employee").department(department).position(position).joinDate(LocalDate.now()).build());
+
+        testTrainingProgram = trainingProgramRepository.save(TrainingProgram.builder().title("Java Training").description("Advanced Java Training").maxCapacity(20).build());
     }
 
     @Test
-    void shouldCreateHolidayWhenUserIsAdmin() throws Exception {
-        CreateUpdateHolidayRequest request = new CreateUpdateHolidayRequest(LocalDate.of(2025, 1, 1), "New Year");
+    void shouldCreateTrainingProgramWhenUserIsAdmin() throws Exception {
+        CreateTrainingProgramRequest request = new CreateTrainingProgramRequest();
+        request.setTitle("Python Training");
+        request.setDescription("Advanced Python Training");
 
-        mockMvc.perform(post("/api/holidays")
+        mockMvc.perform(post("/api/training-programs")
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.description").value("New Year"));
+                .andExpect(jsonPath("$.title").value("Python Training"));
     }
 
     @Test
-    void shouldNotCreateHolidayWhenUserIsEmployee() throws Exception {
-        CreateUpdateHolidayRequest request = new CreateUpdateHolidayRequest(LocalDate.of(2025, 1, 1), "New Year");
+    void shouldCreateEnrollmentWhenUserIsAdmin() throws Exception {
+        CreateEnrollmentRequest request = new CreateEnrollmentRequest();
+        request.setEmployeeId(testEmployee.getId());
+        request.setTrainingProgramId(testTrainingProgram.getId());
 
-        mockMvc.perform(post("/api/holidays")
-                        .header("Authorization", "Bearer " + employeeToken)
+        mockMvc.perform(post("/api/enrollments")
+                        .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.employeeId").value(testEmployee.getId()));
     }
 }

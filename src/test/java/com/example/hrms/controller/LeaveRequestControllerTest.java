@@ -58,6 +58,24 @@ public class LeaveRequestControllerTest {
     private com.example.hrms.repository.AttendanceRepository attendanceRepository;
 
     @Autowired
+    private com.example.hrms.repository.GoalRepository goalRepository;
+
+    @Autowired
+    private com.example.hrms.repository.PerformanceReviewRepository performanceReviewRepository;
+
+    @Autowired
+    private com.example.hrms.repository.EnrollmentRepository enrollmentRepository;
+
+    @Autowired
+    private com.example.hrms.repository.TrainingProgramRepository trainingProgramRepository;
+
+    @Autowired
+    private com.example.hrms.repository.OnboardingTaskRepository onboardingTaskRepository;
+
+    @Autowired
+    private com.example.hrms.repository.OffboardingTaskRepository offboardingTaskRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -75,13 +93,19 @@ public class LeaveRequestControllerTest {
 
     @BeforeEach
     void setUp() {
+        enrollmentRepository.deleteAll();
+        goalRepository.deleteAll();
+        performanceReviewRepository.deleteAll();
         salarySlipRepository.deleteAll();
         documentRepository.deleteAll();
         attendanceRepository.deleteAll();
         leaveRequestRepository.deleteAll();
+        onboardingTaskRepository.deleteAll();
+        offboardingTaskRepository.deleteAll();
         employeeRepository.deleteAll();
         userRepository.deleteAll();
         positionRepository.deleteAll();
+        trainingProgramRepository.deleteAll();
         departmentRepository.deleteAll();
         roleRepository.deleteAll();
 

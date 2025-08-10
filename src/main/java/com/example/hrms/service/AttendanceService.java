@@ -26,6 +26,11 @@ public class AttendanceService {
     private final EmployeeRepository employeeRepository;
     private final AttendanceMapper attendanceMapper;
 
+    /**
+     * Records an employee's clock-in time.
+     * @param request the request object containing the clock-in details
+     * @return the created attendance record
+     */
     @Transactional
     public AttendanceDto clockIn(CreateAttendanceRequest request) {
         Employee employee = employeeRepository.findById(request.getEmployeeId())
@@ -43,6 +48,12 @@ public class AttendanceService {
         return attendanceMapper.toDto(savedAttendance);
     }
 
+    /**
+     * Records an employee's clock-out time.
+     * @param employeeId the ID of the employee
+     * @param date the date of the attendance record
+     * @return the updated attendance record
+     */
     @Transactional
     public AttendanceDto clockOut(Long employeeId, LocalDate date) {
         Attendance attendance = attendanceRepository.findByEmployeeIdAndDate(employeeId, date)
@@ -57,6 +68,13 @@ public class AttendanceService {
         return attendanceMapper.toDto(updatedAttendance);
     }
 
+    /**
+     * Retrieves the attendance records for an employee within a given date range.
+     * @param employeeId the ID of the employee
+     * @param startDate the start date of the range
+     * @param endDate the end date of the range
+     * @return a list of attendance records
+     */
     @Transactional(readOnly = true)
     public List<AttendanceDto> getEmployeeAttendance(Long employeeId, LocalDate startDate, LocalDate endDate) {
         List<Attendance> attendances = attendanceRepository.findByEmployeeIdAndDateBetween(employeeId, startDate, endDate);
@@ -65,6 +83,12 @@ public class AttendanceService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Updates an attendance record.
+     * @param id the ID of the attendance record to update
+     * @param request the request object containing the updated details
+     * @return the updated attendance record
+     */
     @Transactional
     public AttendanceDto updateAttendance(Long id, UpdateAttendanceRequest request) {
         Attendance attendance = attendanceRepository.findById(id)
@@ -84,6 +108,11 @@ public class AttendanceService {
         return attendanceMapper.toDto(updatedAttendance);
     }
 
+    /**
+     * Retrieves an attendance record by its ID.
+     * @param id the ID of the attendance record
+     * @return the attendance record
+     */
     @Transactional(readOnly = true)
     public AttendanceDto getAttendanceById(Long id) {
         Attendance attendance = attendanceRepository.findById(id)

@@ -16,6 +16,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Service for generating reports.
+ */
 @Service
 @RequiredArgsConstructor
 public class ReportingService {
@@ -26,6 +29,13 @@ public class ReportingService {
     private final AttendanceMapper attendanceMapper;
     private final LeaveRequestMapper leaveRequestMapper;
 
+    /**
+     * Generates an attendance report for a given department and date range.
+     * @param departmentId the ID of the department
+     * @param startDate the start date of the report
+     * @param endDate the end date of the report
+     * @return a list of attendance records
+     */
     @Transactional(readOnly = true)
     public List<AttendanceDto> generateAttendanceReport(Long departmentId, LocalDate startDate, LocalDate endDate) {
         List<Employee> employees = employeeRepository.findAllByDepartmentId(departmentId);
@@ -37,6 +47,13 @@ public class ReportingService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Generates a leave report for a given department and date range.
+     * @param departmentId the ID of the department
+     * @param startDate the start date of the report
+     * @param endDate the end date of the report
+     * @return a list of leave requests
+     */
     @Transactional(readOnly = true)
     public List<LeaveRequestDto> generateLeaveReport(Long departmentId, LocalDate startDate, LocalDate endDate) {
         List<Employee> employees = employeeRepository.findAllByDepartmentId(departmentId);

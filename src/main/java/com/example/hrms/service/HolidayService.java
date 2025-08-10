@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Service class for managing holidays.
+ */
 @Service
 public class HolidayService {
 
@@ -22,6 +25,11 @@ public class HolidayService {
         this.holidayMapper = holidayMapper;
     }
 
+    /**
+     * Creates a new holiday.
+     * @param request the request object containing the holiday details
+     * @return the created holiday
+     */
     public HolidayDto createHoliday(CreateUpdateHolidayRequest request) {
         Holiday holiday = new Holiday();
         holiday.setDate(request.getDate());
@@ -29,10 +37,18 @@ public class HolidayService {
         return holidayMapper.toDto(holidayRepository.save(holiday));
     }
 
+    /**
+     * Retrieves all holidays.
+     * @return a list of all holidays
+     */
     public List<HolidayDto> getAllHolidays() {
         return holidayRepository.findAll().stream().map(holidayMapper::toDto).collect(Collectors.toList());
     }
 
+    /**
+     * Deletes a holiday by its ID.
+     * @param id the ID of the holiday to delete
+     */
     public void deleteHoliday(Long id) {
         holidayRepository.deleteById(id);
     }

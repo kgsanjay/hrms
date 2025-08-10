@@ -18,6 +18,9 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Service for managing salaries and salary slips.
+ */
 @Service
 @RequiredArgsConstructor
 public class SalaryService {
@@ -27,6 +30,11 @@ public class SalaryService {
     private final SalarySlipMapper salarySlipMapper;
     private final UserRepository userRepository;
 
+    /**
+     * Generates a salary slip for an employee.
+     * @param request the request object containing the salary slip details
+     * @return the created salary slip
+     */
     @Transactional
     public SalarySlipDto generateSalarySlip(GenerateSalarySlipRequest request) {
         Employee employee = employeeRepository.findById(request.getEmployeeId())
@@ -46,6 +54,11 @@ public class SalaryService {
         return salarySlipMapper.toDto(savedSlip);
     }
 
+    /**
+     * Retrieves the salary slips for the currently authenticated employee.
+     * @param username the username of the authenticated employee
+     * @return a list of salary slips
+     */
     @Transactional(readOnly = true)
     public List<SalarySlipDto> getMySalarySlips(String username) {
         User user = userRepository.findByUsername(username)
