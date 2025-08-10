@@ -14,5 +14,7 @@ public interface EmployeeMapper {
     @Mapping(source = "department.name", target = "departmentName")
     @Mapping(source = "position.id", target = "positionId")
     @Mapping(source = "position.title", target = "positionTitle")
+    @Mapping(source = "phoneNumber", target = "phoneNumber")
+    @Mapping(source = "address", target = "address")
     EmployeeDto toDto(Employee employee);
 }

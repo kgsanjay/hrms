@@ -35,6 +35,27 @@ public class AuthenticationControllerTest {
     private RoleRepository roleRepository;
 
     @Autowired
+    private com.example.hrms.repository.EmployeeRepository employeeRepository;
+
+    @Autowired
+    private com.example.hrms.repository.DepartmentRepository departmentRepository;
+
+    @Autowired
+    private com.example.hrms.repository.PositionRepository positionRepository;
+
+    @Autowired
+    private com.example.hrms.repository.SalarySlipRepository salarySlipRepository;
+
+    @Autowired
+    private com.example.hrms.repository.DocumentRepository documentRepository;
+
+    @Autowired
+    private com.example.hrms.repository.AttendanceRepository attendanceRepository;
+
+    @Autowired
+    private com.example.hrms.repository.LeaveRequestRepository leaveRequestRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -42,7 +63,14 @@ public class AuthenticationControllerTest {
 
     @BeforeEach
     void setUp() {
+        salarySlipRepository.deleteAll();
+        documentRepository.deleteAll();
+        attendanceRepository.deleteAll();
+        leaveRequestRepository.deleteAll();
+        employeeRepository.deleteAll();
         userRepository.deleteAll();
+        positionRepository.deleteAll();
+        departmentRepository.deleteAll();
         roleRepository.deleteAll();
     }
 

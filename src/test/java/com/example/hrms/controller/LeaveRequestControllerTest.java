@@ -49,6 +49,15 @@ public class LeaveRequestControllerTest {
     private LeaveRequestRepository leaveRequestRepository;
 
     @Autowired
+    private DocumentRepository documentRepository;
+
+    @Autowired
+    private com.example.hrms.repository.SalarySlipRepository salarySlipRepository;
+
+    @Autowired
+    private com.example.hrms.repository.AttendanceRepository attendanceRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -66,6 +75,9 @@ public class LeaveRequestControllerTest {
 
     @BeforeEach
     void setUp() {
+        salarySlipRepository.deleteAll();
+        documentRepository.deleteAll();
+        attendanceRepository.deleteAll();
         leaveRequestRepository.deleteAll();
         employeeRepository.deleteAll();
         userRepository.deleteAll();
@@ -85,7 +97,13 @@ public class LeaveRequestControllerTest {
 
         Department department = departmentRepository.save(new Department(null, "IT", null));
         Position position = positionRepository.save(new Position(null, "Developer", department));
-        testEmployee = employeeRepository.save(new Employee(null, employeeUser, "Test Employee", department, position, LocalDate.now()));
+        testEmployee = employeeRepository.save(Employee.builder()
+                .user(employeeUser)
+                .name("Test Employee")
+                .department(department)
+                .position(position)
+                .joinDate(LocalDate.now())
+                .build());
     }
 
     @Test

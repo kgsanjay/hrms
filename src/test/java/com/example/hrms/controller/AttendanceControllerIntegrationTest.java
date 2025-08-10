@@ -63,14 +63,28 @@ class AttendanceControllerIntegrationTest {
     @Autowired
     private PositionRepository positionRepository;
 
+    @Autowired
+    private com.example.hrms.repository.SalarySlipRepository salarySlipRepository;
+
+    @Autowired
+    private com.example.hrms.repository.DocumentRepository documentRepository;
+
+    @Autowired
+    private com.example.hrms.repository.LeaveRequestRepository leaveRequestRepository;
+
     private User employeeUser;
     private Employee employee;
 
     @BeforeEach
     void setUp() {
+        salarySlipRepository.deleteAll();
+        documentRepository.deleteAll();
         attendanceRepository.deleteAll();
+        leaveRequestRepository.deleteAll();
         employeeRepository.deleteAll();
         userRepository.deleteAll();
+        positionRepository.deleteAll();
+        departmentRepository.deleteAll();
         roleRepository.deleteAll();
 
         Role employeeRole = new Role();

@@ -20,7 +20,7 @@ public class Employee {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
@@ -37,4 +37,8 @@ public class Employee {
 
     @Column(nullable = false)
     private LocalDate joinDate;
+
+    private String phoneNumber;
+
+    private String address;
 }

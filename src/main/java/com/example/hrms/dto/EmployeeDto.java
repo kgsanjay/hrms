@@ -20,4 +20,6 @@ public class EmployeeDto {
     private String departmentName;
     private Long positionId;
     private String positionTitle;
+    private String phoneNumber;
+    private String address;
 }

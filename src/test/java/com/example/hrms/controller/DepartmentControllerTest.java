@@ -42,6 +42,24 @@ public class DepartmentControllerTest {
     private DepartmentRepository departmentRepository;
 
     @Autowired
+    private com.example.hrms.repository.EmployeeRepository employeeRepository;
+
+    @Autowired
+    private com.example.hrms.repository.PositionRepository positionRepository;
+
+    @Autowired
+    private com.example.hrms.repository.SalarySlipRepository salarySlipRepository;
+
+    @Autowired
+    private com.example.hrms.repository.DocumentRepository documentRepository;
+
+    @Autowired
+    private com.example.hrms.repository.AttendanceRepository attendanceRepository;
+
+    @Autowired
+    private com.example.hrms.repository.LeaveRequestRepository leaveRequestRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -58,8 +76,14 @@ public class DepartmentControllerTest {
 
     @BeforeEach
     void setUp() {
-        departmentRepository.deleteAll();
+        salarySlipRepository.deleteAll();
+        documentRepository.deleteAll();
+        attendanceRepository.deleteAll();
+        leaveRequestRepository.deleteAll();
+        employeeRepository.deleteAll();
         userRepository.deleteAll();
+        positionRepository.deleteAll();
+        departmentRepository.deleteAll();
         roleRepository.deleteAll();
 
         Role adminRole = roleRepository.save(Role.builder().name(RoleType.ADMIN).build());

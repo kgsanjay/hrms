@@ -3,11 +3,13 @@ package com.example.hrms.controller;
 import com.example.hrms.dto.CreateEmployeeRequest;
 import com.example.hrms.dto.EmployeeDto;
 import com.example.hrms.dto.UpdateEmployeeRequest;
+import com.example.hrms.dto.UpdateProfileRequest;
 import com.example.hrms.service.EmployeeService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -44,5 +46,11 @@ public class EmployeeController {
     @PreAuthorize("hasAnyAuthority('ADMIN', 'HR')")
     public ResponseEntity<EmployeeDto> updateEmployee(@PathVariable Long id, @Valid @RequestBody UpdateEmployeeRequest request) {
         return ResponseEntity.ok(employeeService.updateEmployee(id, request));
+    }
+
+    @PutMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<EmployeeDto> updateMyProfile(@Valid @RequestBody UpdateProfileRequest request, Authentication authentication) {
+        return ResponseEntity.ok(employeeService.updateMyProfile(authentication.getName(), request));
     }
 }

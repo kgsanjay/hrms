@@ -1,10 +1,8 @@
 package com.example.hrms.controller;
 
-import com.example.hrms.dto.CreateUpdateHolidayRequest;
+import com.example.hrms.dto.GenerateSalarySlipRequest;
 import com.example.hrms.entity.*;
-import com.example.hrms.repository.HolidayRepository;
-import com.example.hrms.repository.RoleRepository;
-import com.example.hrms.repository.UserRepository;
+import com.example.hrms.repository.*;
 import com.example.hrms.util.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,15 +15,18 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.YearMonth;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-public class HolidayControllerTest {
+public class SalaryControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -37,28 +38,25 @@ public class HolidayControllerTest {
     private RoleRepository roleRepository;
 
     @Autowired
-    private HolidayRepository holidayRepository;
+    private DepartmentRepository departmentRepository;
 
     @Autowired
-    private com.example.hrms.repository.EmployeeRepository employeeRepository;
+    private PositionRepository positionRepository;
 
     @Autowired
-    private com.example.hrms.repository.DepartmentRepository departmentRepository;
+    private EmployeeRepository employeeRepository;
 
     @Autowired
-    private com.example.hrms.repository.PositionRepository positionRepository;
+    private SalarySlipRepository salarySlipRepository;
 
     @Autowired
-    private com.example.hrms.repository.SalarySlipRepository salarySlipRepository;
+    private DocumentRepository documentRepository;
 
     @Autowired
-    private com.example.hrms.repository.DocumentRepository documentRepository;
+    private AttendanceRepository attendanceRepository;
 
     @Autowired
-    private com.example.hrms.repository.AttendanceRepository attendanceRepository;
-
-    @Autowired
-    private com.example.hrms.repository.LeaveRequestRepository leaveRequestRepository;
+    private LeaveRequestRepository leaveRequestRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -74,6 +72,7 @@ public class HolidayControllerTest {
 
     private String adminToken;
     private String employeeToken;
+    private Employee testEmployee;
 
     @BeforeEach
     void setUp() {
@@ -81,7 +80,6 @@ public class HolidayControllerTest {
         documentRepository.deleteAll();
         attendanceRepository.deleteAll();
         leaveRequestRepository.deleteAll();
-        holidayRepository.deleteAll();
         employeeRepository.deleteAll();
         userRepository.deleteAll();
         positionRepository.deleteAll();
@@ -97,28 +95,47 @@ public class HolidayControllerTest {
         User employeeUser = User.builder().username("employee").password(passwordEncoder.encode("password")).role(employeeRole).status(UserStatus.ACTIVE).build();
         userRepository.save(employeeUser);
         employeeToken = jwtUtil.generateToken(userDetailsService.loadUserByUsername("employee"));
+
+        Department department = departmentRepository.save(new Department(null, "IT", null));
+        Position position = positionRepository.save(new Position(null, "Developer", department));
+        testEmployee = employeeRepository.save(Employee.builder()
+                .user(employeeUser)
+                .name("Test Employee")
+                .department(department)
+                .position(position)
+                .joinDate(LocalDate.now())
+                .build());
     }
 
     @Test
-    void shouldCreateHolidayWhenUserIsAdmin() throws Exception {
-        CreateUpdateHolidayRequest request = new CreateUpdateHolidayRequest(LocalDate.of(2025, 1, 1), "New Year");
+    void shouldGenerateSalarySlipWhenUserIsAdmin() throws Exception {
+        GenerateSalarySlipRequest request = new GenerateSalarySlipRequest();
+        request.setEmployeeId(testEmployee.getId());
+        request.setPayPeriod(YearMonth.of(2025, 10));
+        request.setBasicSalary(new BigDecimal("5000.00"));
+        request.setDeductions(new BigDecimal("500.00"));
 
-        mockMvc.perform(post("/api/holidays")
+        mockMvc.perform(post("/api/salaries/generate")
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.description").value("New Year"));
+                .andExpect(jsonPath("$.netPay").value(4500.00));
     }
 
     @Test
-    void shouldNotCreateHolidayWhenUserIsEmployee() throws Exception {
-        CreateUpdateHolidayRequest request = new CreateUpdateHolidayRequest(LocalDate.of(2025, 1, 1), "New Year");
+    void shouldGetOwnSalarySlips() throws Exception {
+        salarySlipRepository.save(SalarySlip.builder()
+                .employee(testEmployee)
+                .payPeriod(YearMonth.of(2025, 9))
+                .basicSalary(new BigDecimal("5000.00"))
+                .deductions(new BigDecimal("500.00"))
+                .netPay(new BigDecimal("4500.00"))
+                .build());
 
-        mockMvc.perform(post("/api/holidays")
-                        .header("Authorization", "Bearer " + employeeToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isForbidden());
+        mockMvc.perform(get("/api/employees/me/salary-slips")
+                        .header("Authorization", "Bearer " + employeeToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].payPeriod").value("2025-09"));
     }
 }
