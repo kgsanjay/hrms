@@ -21,6 +21,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 
+import com.example.hrms.dto.UpdateProfileRequest;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -48,6 +51,18 @@ public class EmployeeControllerTest {
     private EmployeeRepository employeeRepository;
 
     @Autowired
+    private com.example.hrms.repository.SalarySlipRepository salarySlipRepository;
+
+    @Autowired
+    private com.example.hrms.repository.DocumentRepository documentRepository;
+
+    @Autowired
+    private com.example.hrms.repository.AttendanceRepository attendanceRepository;
+
+    @Autowired
+    private com.example.hrms.repository.LeaveRequestRepository leaveRequestRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -67,6 +82,10 @@ public class EmployeeControllerTest {
 
     @BeforeEach
     void setUp() {
+        salarySlipRepository.deleteAll();
+        documentRepository.deleteAll();
+        attendanceRepository.deleteAll();
+        leaveRequestRepository.deleteAll();
         employeeRepository.deleteAll();
         userRepository.deleteAll();
         positionRepository.deleteAll();
@@ -108,5 +127,39 @@ public class EmployeeControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("John Doe"));
+    }
+
+    @Test
+    void shouldUpdateOwnProfile() throws Exception {
+        User employeeUser = User.builder()
+                .username("employee")
+                .password(passwordEncoder.encode("password"))
+                .role(employeeRole)
+                .status(UserStatus.ACTIVE)
+                .build();
+        userRepository.save(employeeUser);
+
+        Employee employee = Employee.builder()
+                .user(employeeUser)
+                .name("Test Employee")
+                .department(testDepartment)
+                .position(testPosition)
+                .joinDate(LocalDate.now())
+                .build();
+        employeeRepository.save(employee);
+
+        String employeeToken = jwtUtil.generateToken(userDetailsService.loadUserByUsername("employee"));
+
+        UpdateProfileRequest request = new UpdateProfileRequest();
+        request.setPhoneNumber("1234567890");
+        request.setAddress("123 Main St");
+
+        mockMvc.perform(put("/api/employees/me")
+                        .header("Authorization", "Bearer " + employeeToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.phoneNumber").value("1234567890"))
+                .andExpect(jsonPath("$.address").value("123 Main St"));
     }
 }
