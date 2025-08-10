@@ -15,6 +15,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Service for managing leave requests.
+ */
 @Service
 public class LeaveRequestService {
 
@@ -28,6 +31,11 @@ public class LeaveRequestService {
         this.leaveRequestMapper = leaveRequestMapper;
     }
 
+    /**
+     * Creates a new leave request.
+     * @param request the request object containing the leave request details
+     * @return the created leave request
+     */
     public LeaveRequestDto createLeaveRequest(CreateLeaveRequest request) {
         Employee employee = employeeRepository.findById(request.getEmployeeId())
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
@@ -42,6 +50,12 @@ public class LeaveRequestService {
         return leaveRequestMapper.toDto(leaveRequestRepository.save(leaveRequest));
     }
 
+    /**
+     * Updates the status of a leave request.
+     * @param id the ID of the leave request to update
+     * @param request the request object containing the new status
+     * @return the updated leave request
+     */
     public LeaveRequestDto updateLeaveRequestStatus(Long id, UpdateLeaveRequestStatusRequest request) {
         LeaveRequest leaveRequest = leaveRequestRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Leave request not found"));
@@ -49,6 +63,10 @@ public class LeaveRequestService {
         return leaveRequestMapper.toDto(leaveRequestRepository.save(leaveRequest));
     }
 
+    /**
+     * Retrieves all leave requests.
+     * @return a list of all leave requests
+     */
     public List<LeaveRequestDto> getAllLeaveRequests() {
         return leaveRequestRepository.findAll().stream()
                 .map(leaveRequestMapper::toDto)

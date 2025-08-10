@@ -43,6 +43,11 @@ public class EmployeeService {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Creates a new employee.
+     * @param request the request object containing the employee details
+     * @return the created employee
+     */
     public EmployeeDto createEmployee(CreateEmployeeRequest request) {
         Department department = departmentRepository.findById(request.getDepartmentId())
                 .orElseThrow(() -> new EntityNotFoundException("Department not found"));
@@ -69,18 +74,33 @@ public class EmployeeService {
         return employeeMapper.toDto(savedEmployee);
     }
 
+    /**
+     * Retrieves an employee by their ID.
+     * @param id the ID of the employee to retrieve
+     * @return the employee
+     */
     public EmployeeDto getEmployeeById(Long id) {
         Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
         return employeeMapper.toDto(employee);
     }
 
+    /**
+     * Retrieves all employees.
+     * @return a list of all employees
+     */
     public List<EmployeeDto> getAllEmployees() {
         return employeeRepository.findAll().stream()
                 .map(employeeMapper::toDto)
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Updates an employee's details.
+     * @param id the ID of the employee to update
+     * @param request the request object containing the updated details
+     * @return the updated employee
+     */
     public EmployeeDto updateEmployee(Long id, UpdateEmployeeRequest request) {
         Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
@@ -98,6 +118,12 @@ public class EmployeeService {
         return employeeMapper.toDto(updatedEmployee);
     }
 
+    /**
+     * Updates the profile of the currently authenticated employee.
+     * @param username the username of the authenticated employee
+     * @param request the request object containing the updated profile details
+     * @return the updated employee
+     */
     @Transactional
     public EmployeeDto updateMyProfile(String username, UpdateProfileRequest request) {
         User user = userRepository.findByUsername(username)

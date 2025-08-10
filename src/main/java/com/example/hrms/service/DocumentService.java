@@ -13,6 +13,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+/**
+ * Service for managing documents.
+ */
 @Service
 public class DocumentService {
 
@@ -26,6 +29,12 @@ public class DocumentService {
         this.employeeRepository = employeeRepository;
     }
 
+    /**
+     * Stores a document for an employee.
+     * @param file the document file
+     * @param employeeId the ID of the employee
+     * @param documentType the type of the document
+     */
     public void store(MultipartFile file, Long employeeId, DocumentType documentType) {
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
